@@ -1,0 +1,44 @@
+ #raise NotImplementedError
+    print(game)
+    
+    if my_turn == True:
+        player = game.get_active_player()
+        player_moves = game.get_player_moves(player)
+        if depth == 0 or time_left == 0:
+            return (None, len(player_moves) - len(game.get_opponent_moves(player)))
+        
+        best_move = None 
+        highest_value = -100000 #need a very small number that I know the board wont generate
+        for move in player_moves:
+            forecast = game.forecast_move(move)
+            forecast_board = forecast[0]
+            forecast_win = forecast[1]
+            if forecast_win == True:
+                #this means our tree has found a path to win
+                return move, 100000
+            else:
+                previous_move, value = minimax(player, forecast_board, time_left, depth-1, my_turn=False)
+                if value > highest_value:
+                    highest_value = value
+                    best_move = move
+        return best_move, highest_value
+                    
+    elif my_turn == False:
+        player = game.get_inactive_player()
+        opponent_moves = game.get_opponent_moves(player)
+        
+        #moves = []
+        best_move = None
+        lowest_value = 100000
+        for move in opponent_moves:
+            forecast = game.forecast_move(move)
+            forecast_board = forecast[0]
+            forecast_win = forecast[1]
+            if forecast_win == True:
+                return move, -100000
+            else:
+                previous_move, value = minimax(player, forecast_board, time_left, depth-1, my_turn=True)
+                if value < lowest_value:
+                    lowest_value = value
+                    best_move = move
+        return best_move, lowest_value
